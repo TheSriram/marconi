@@ -27,6 +27,8 @@ class TestSqlite(testing.TestBase):
         storage = reference.Driver()
         q = storage.queue_controller
         q.create('fizbit', '480924', messages={'ttl': 40})
+        with testtools.ExpectedException(exceptions.AlreadyExist):
+            q.create('fizbit', '480924', messages={'ttl': 80})
         q.create('boomerang', '480924', messages={'ttl': 60})
         q.create('boomerang', '01314', messages={'ttl': 60})
         q.create('unrelated', '01314', messages={'ttl': 60})

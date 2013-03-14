@@ -86,10 +86,13 @@ class Queue(base.QueueBase):
             raise exceptions.DoesNotExist('/'.join([tenant, 'queues', name]))
 
     def create(self, name, tenant, **metadata):
-        self.driver.run('''insert into Queues values
-                (null, ?, ?, ?, ?)''',
-                tenant, name, metadata['messages']['ttl'],
-                json.dumps(metadata))
+        try:
+            self.driver.run('''insert into Queues values
+                    (null, ?, ?, ?, ?)''',
+                    tenant, name, metadata['messages']['ttl'],
+                    json.dumps(metadata))
+        except sqlite3.IntegrityError:
+            raise exceptions.AlreadyExist('/'.join([tenant, 'queues', name]))
 
     def update(self, name, tenant, **metadata):
         self.driver.run('''update Queues set ttl = ?, metadata = ? where
