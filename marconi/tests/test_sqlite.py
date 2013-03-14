@@ -25,15 +25,15 @@ class TestSqlite(testing.TestBase):
     def test_sqlite(self):
         storage = reference.Driver()
         q = storage.queue_controller
-        q.create_or_update('fizbit', '480924', messages={'ttl': 40})
-        q.create_or_update('boomerang', '480924', messages={'ttl': 60})
-        q.create_or_update('boomerang', '01314', messages={'ttl': 60})
-        q.create_or_update('unrelated', '01314', messages={'ttl': 60})
+        q.create('fizbit', '480924', messages={'ttl': 40})
+        q.create('boomerang', '480924', messages={'ttl': 60})
+        q.create('boomerang', '01314', messages={'ttl': 60})
+        q.create('unrelated', '01314', messages={'ttl': 60})
         self.assertEquals(set(q.list('480924')), set(['fizbit', 'boomerang']))
         self.assertEquals(q.get('fizbit', '480924'), {'messages': {'ttl': 40}})
         with testtools.ExpectedException(exceptions.DoesNotExist):
             q.get('Fizbit', '480924')
-        q.create_or_update('fizbit', '480924', messages={'ttl': 20})
+        q.update('fizbit', '480924', messages={'ttl': 20})
         self.assertEquals(q.get('fizbit', '480924'), {'messages': {'ttl': 20}})
         q.delete('boomerang', '480924')
         with testtools.ExpectedException(exceptions.DoesNotExist):
@@ -59,3 +59,4 @@ class TestSqlite(testing.TestBase):
         l2 = m.post('fizbit', d, '480924')
         self.assertEquals([int(v) + 2 for v in l1], map(int, l2))
         self.assertEquals(q.stats('fizbit', '480924')['messages'] - n, 4)
+        q.delete('fizbit', '480924')

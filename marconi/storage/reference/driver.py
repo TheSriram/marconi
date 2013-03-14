@@ -24,7 +24,7 @@ from marconi.storage import exceptions
 
 cfg = config.namespace('drivers:storage:reference').from_options(
         # change it to ':memory:' !!
-        database='debug.sqlite')
+        database=':memory:')
 
 
 class Driver(storage.DriverBase):
@@ -85,17 +85,18 @@ class Queue(base.QueueBase):
         except TypeError:
             raise exceptions.DoesNotExist('/'.join([tenant, 'queues', name]))
 
-    def create_or_update(self, name, tenant, **metadata):
-        self.driver.run('''replace into Queues values
+    def create(self, name, tenant, **metadata):
+        self.driver.run('''insert into Queues values
                 (null, ?, ?, ?, ?)''',
                 tenant, name, metadata['messages']['ttl'],
                 json.dumps(metadata))
 
-    def create(self):
-        pass
 
-    def update(self):
-        pass
+    def update(self, name, tenant, **metadata):
+        self.driver.run('''update Queues set ttl = ?, metadata = ? where
+                tenant = ? and name = ?''',
+                metadata['messages']['ttl'],
+                json.dumps(metadata), tenant, name)
 
     def delete(self, name, tenant):
         self.driver.run('''delete from Queues where tenant = ? and name = ?''',

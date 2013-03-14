@@ -41,6 +41,5 @@ class QueuesResource(object):
         meta = json.load(req.stream)
 
         #TODO(kgriffs): catch exceptions
-        self.queue_ctrl.create_or_update(queue_name, tenant=tenant_id, **meta)
-
+        self.queue_ctrl.create(queue_name, tenant=tenant_id, **meta)
         resp.status = falcon.HTTP_201
