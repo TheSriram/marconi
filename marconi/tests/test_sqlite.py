@@ -20,6 +20,7 @@ from marconi.storage import exceptions
 from marconi.storage import reference
 from marconi.tests import util as testing
 
+
 class TestSqlite(testing.TestBase):
 
     def test_sqlite(self):

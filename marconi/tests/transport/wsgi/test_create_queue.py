@@ -75,7 +75,6 @@ class TestCreateQueue(util.TestBase):
         self.app(env, self.srmock)
         self.assertEquals(self.srmock.status, falcon.HTTP_201)
 
-
         doc = '{"messages": {"ttl": 600}, "padding": "%s"}'
         padding_len = transport.MAX_QUEUE_METADATA_SIZE * 2
         doc = doc % ('x' * padding_len)

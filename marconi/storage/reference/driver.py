@@ -91,7 +91,6 @@ class Queue(base.QueueBase):
                 tenant, name, metadata['messages']['ttl'],
                 json.dumps(metadata))
 
-
     def update(self, name, tenant, **metadata):
         self.driver.run('''update Queues set ttl = ?, metadata = ? where
                 tenant = ? and name = ?''',
