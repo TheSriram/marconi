@@ -13,11 +13,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import falcon
+from falcon import testing
+
 import marconi
-from marconi.tests import util as testing
+from marconi.tests import util
 
 
-class TestCreateQueue(testing.TestBase):
+class TestCreateQueue(util.TestBase):
 
     def setUp(self):
         super(TestCreateQueue, self).setUp()
@@ -25,7 +28,13 @@ class TestCreateQueue(testing.TestBase):
         conf_file = self.conf_path('wsgi_reference.conf')
         boot = marconi.Bootstrap(conf_file)
         transport = boot.transport
-        wsgi_app = transport.app
+
+        self.app = transport.app
+        self.srmock = testing.StartResponseMock()
 
     def test_simple(self):
-        pass
+        env = testing.create_environ('/v1/480924/queues/fizbat',
+                                     method="PUT")
+
+        self.app(env, self.srmock)
+        self.assertEquals(falcon.HTTP_200, self.srmock.status)

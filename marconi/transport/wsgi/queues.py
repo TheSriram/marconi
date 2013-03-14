@@ -13,24 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import falcon
+class QueuesResource(object):
 
-from marconi.common import config
-from marconi import transport
-
-
-cfg = config.namespace('drivers:transport:wsgi').from_options(port=8888)
-
-
-class Driver(transport.DriverBase):
-
-    def __init__(self, queue_controller, message_controller,
-                 claim_controller):
-
-        queues = transport.wsgi.QueuesResource()
-
-        self.app = api = falcon.API()
-        api.add_route('/v1/{tenant_id}/queues/{queue_name}', queues)
-
-    def listen(self):
+    def on_put(self, req, resp, tenant_id, queue_name):
         pass
