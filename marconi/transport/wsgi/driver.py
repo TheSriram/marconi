@@ -27,7 +27,7 @@ class Driver(transport.DriverBase):
     def __init__(self, queue_controller, message_controller,
                  claim_controller):
 
-        queues = transport.wsgi.QueuesResource()
+        queues = transport.wsgi.QueuesResource(queue_controller)
 
         self.app = api = falcon.API()
         api.add_route('/v1/{tenant_id}/queues/{queue_name}', queues)

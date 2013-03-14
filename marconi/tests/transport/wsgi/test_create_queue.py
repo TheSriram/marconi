@@ -18,6 +18,7 @@ from falcon import testing
 
 import marconi
 from marconi.tests import util
+from marconi import transport
 
 
 class TestCreateQueue(util.TestBase):
@@ -33,8 +34,37 @@ class TestCreateQueue(util.TestBase):
         self.srmock = testing.StartResponseMock()
 
     def test_simple(self):
+        doc = '{"messages": {"ttl": 600}}'
+        env = testing.create_environ('/v1/480924/queues/fizbat',
+                                     method="PUT",
+                                     body=doc)
+
+        self.app(env, self.srmock)
+        self.assertEquals(falcon.HTTP_200, self.srmock.status)
+
+    def test_metadata(self):
         env = testing.create_environ('/v1/480924/queues/fizbat',
                                      method="PUT")
 
         self.app(env, self.srmock)
-        self.assertEquals(falcon.HTTP_200, self.srmock.status)
+        self.assertEquals(self.srmock.status, falcon.HTTP_400)
+
+        doc = '{"messages": {"ttl": 600}, "padding": "%s"}'
+        padding_len = transport.MAX_QUEUE_METADATA_SIZE - (len(doc) - 1)
+        doc = doc % ('x' * padding_len)
+        env = testing.create_environ('/v1/480924/queues/fizbat',
+                                     method="PUT",
+                                     body=doc)
+
+        self.app(env, self.srmock)
+        self.assertEquals(self.srmock.status, falcon.HTTP_200)
+
+        doc = '{"messages": {"ttl": 600}, "padding": "%s"}'
+        padding_len = transport.MAX_QUEUE_METADATA_SIZE - (len(doc) - 2)
+        doc = doc % ('x' * padding_len)
+        env = testing.create_environ('/v1/480924/queues/fizbat',
+                                     method="PUT",
+                                     body=doc)
+
+        self.app(env, self.srmock)
+        self.assertEquals(self.srmock.status, falcon.HTTP_200)

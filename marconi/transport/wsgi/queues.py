@@ -13,7 +13,32 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import json
+
+import falcon
+
+from marconi import transport
+
+
 class QueuesResource(object):
 
+    __slots__ = ('queue_ctrl')
+
+    def __init__(self, queue_controller):
+        self.queue_ctrl = queue_controller
+
     def on_put(self, req, resp, tenant_id, queue_name):
-        pass
+        if req.content_length > transport.MAX_QUEUE_METADATA_SIZE:
+            raise falcon.HTTPBadRequest(_('Bad request'),
+                                        _('Queue metadata size is too large.'))
+
+
+        if req.content_length is None or req.content_length == 0:
+            raise falcon.HTTPBadRequest(_('Bad request'),
+                                        _('Missing queue metadata.'))
+
+        #TODO(kgriffs): check for malformed JSON, must be a hash at top level
+        meta = json.load(req.stream)
+
+        #TODO(kgriffs): catch exceptions
+        self.queue_ctrl.create_or_update(queue_name, tenant=tenant_id, **meta)
