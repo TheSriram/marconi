@@ -17,7 +17,7 @@ import os
 import testtools
 
 
-class TestSuite(testtools.TestCase):
+class TestBase(testtools.TestCase):
     """
     Child class of testtools.TestCase for testing Marconi
 

@@ -13,10 +13,10 @@
 # under the License.
 
 import marconi
-from marconi.tests.util import suite
+from marconi.tests import util as testing
 
 
-class TestSimple(suite.TestSuite):
+class TestSimple(testing.TestBase):
 
     def test_simple(self):
         """Doesn't really test much."""
