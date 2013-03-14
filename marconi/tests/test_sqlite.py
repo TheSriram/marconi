@@ -53,6 +53,8 @@ class TestSqlite(testing.TestBase):
                 }
                 }
             ]
+        n = q.stats('fizbit', '480924')['messages']
         l1 = m.post('fizbit', d, '480924')
         l2 = m.post('fizbit', d, '480924')
         self.assertEquals([v + 2 for v in l1], l2)
+        self.assertEquals(q.stats('fizbit', '480924')['messages'] - n, 4)

@@ -102,7 +102,11 @@ class Queue(base.QueueBase):
                 tenant, name)
 
     def stats(self, name, tenant):
-        pass
+        qid = self.driver.get('''select id from Queues where
+                tenant = ? and name = ?''', tenant, name)[0]
+        return {'messages': self.driver.get('''select count(id)
+            from Messages where qid = ?''', qid)[0],
+                'actions': 0}
 
     def actions(self, name, tenant, marker=None, limit=10):
         pass
