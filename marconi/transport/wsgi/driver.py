@@ -13,6 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import falcon
+
 from marconi.common import config
 from marconi import transport
 
@@ -34,11 +36,7 @@ class Driver(transport.DriverBase):
         self._message_controller = message_controller
         self._claim_controller = claim_controller
 
-        # self.app = api = falcon.API()
+        self.app = api = falcon.API()
 
     def listen(self):
-        pass
-
-    def app(self, env, start_response, exc_info=None):
-        """This will be replace by falcon.API()."""
         pass
