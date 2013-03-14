@@ -42,6 +42,7 @@ class QueuesResource(object):
         #TODO(kgriffs): catch exceptions
         self.queue_ctrl.create(queue_name, tenant=tenant_id, **meta)
         resp.status = falcon.HTTP_201
+        resp.location = req.path
 
     def on_get(self, req, resp, tenant_id, queue_name):
         doc = self.queue_ctrl.get(queue_name, tenant=tenant_id)

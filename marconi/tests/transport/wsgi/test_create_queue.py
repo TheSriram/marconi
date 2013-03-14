@@ -15,6 +15,7 @@
 
 import falcon
 from falcon import testing
+from testtools import matchers
 
 import marconi
 from marconi.tests import util
@@ -28,9 +29,8 @@ class TestCreateQueue(util.TestBase):
 
         conf_file = self.conf_path('wsgi_reference.conf')
         boot = marconi.Bootstrap(conf_file)
-        transport = boot.transport
 
-        self.app = transport.app
+        self.app = boot.transport.app
         self.srmock = testing.StartResponseMock()
 
     def test_simple(self):
@@ -41,6 +41,9 @@ class TestCreateQueue(util.TestBase):
 
         self.app(env, self.srmock)
         self.assertEquals(self.srmock.status, falcon.HTTP_201)
+
+        location = ('Location', '/v1/480924/queues/gumshoe')
+        self.assertThat(self.srmock.headers, matchers.Contains(location))
 
         env = testing.create_environ('/v1/480924/queues/gumshoe')
         result = self.app(env, self.srmock)
