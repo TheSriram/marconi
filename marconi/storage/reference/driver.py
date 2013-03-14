@@ -145,7 +145,7 @@ class Message(base.MessageBase):
                 self.driver.run('''insert into Messages values
                         (?, ?, ?, ?, date())''',
                         lastid, qid, ttl, json.dumps(m))
-        return range(lastid - len(messages) + 1, lastid + 1)
+        return [str(x + 1) for x in range(lastid - len(messages), lastid)]
 
     def delete(self, queue, message_id, tenant=None, claim=None):
         """
