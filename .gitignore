@@ -17,3 +17,4 @@ venv
 versioninfo
 var/*
 ChangeLog
+.idea/*
