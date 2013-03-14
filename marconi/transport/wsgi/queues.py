@@ -32,7 +32,6 @@ class QueuesResource(object):
             raise falcon.HTTPBadRequest(_('Bad request'),
                                         _('Queue metadata size is too large.'))
 
-
         if req.content_length is None or req.content_length == 0:
             raise falcon.HTTPBadRequest(_('Bad request'),
                                         _('Missing queue metadata.'))
@@ -43,3 +42,7 @@ class QueuesResource(object):
         #TODO(kgriffs): catch exceptions
         self.queue_ctrl.create(queue_name, tenant=tenant_id, **meta)
         resp.status = falcon.HTTP_201
+
+    def on_get(self, req, resp, tenant_id, queue_name):
+        doc = self.queue_ctrl.get(queue_name, tenant=tenant_id)
+        resp.body = json.dumps(doc)

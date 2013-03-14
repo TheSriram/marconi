@@ -35,12 +35,17 @@ class TestCreateQueue(util.TestBase):
 
     def test_simple(self):
         doc = '{"messages": {"ttl": 600}}'
-        env = testing.create_environ('/v1/480924/queues/fizbat',
+        env = testing.create_environ('/v1/480924/queues/gumshoe',
                                      method="PUT",
                                      body=doc)
 
         self.app(env, self.srmock)
         self.assertEquals(self.srmock.status, falcon.HTTP_201)
+
+        env = testing.create_environ('/v1/480924/queues/gumshoe')
+        result = self.app(env, self.srmock)
+        self.assertEquals(self.srmock.status, falcon.HTTP_200)
+        self.assertEquals(result, [doc])
 
     def test_metadata(self):
         env = testing.create_environ('/v1/480924/queues/fizbat',
@@ -50,14 +55,15 @@ class TestCreateQueue(util.TestBase):
         self.assertEquals(self.srmock.status, falcon.HTTP_400)
 
         doc = '{"messages": {"ttl": 600}, "padding": "%s"}'
-        padding_len = transport.MAX_QUEUE_METADATA_SIZE - (len(doc) - 1)
+        padding_len = transport.MAX_QUEUE_METADATA_SIZE - (len(doc) - 2) + 1
         doc = doc % ('x' * padding_len)
         env = testing.create_environ('/v1/480924/queues/fizbat',
                                      method="PUT",
                                      body=doc)
 
+        print('\n' + str(len(doc)))
         self.app(env, self.srmock)
-        self.assertEquals(self.srmock.status, falcon.HTTP_201)
+        self.assertEquals(self.srmock.status, falcon.HTTP_400)
 
         doc = '{"messages": {"ttl": 600}, "padding": "%s"}'
         padding_len = transport.MAX_QUEUE_METADATA_SIZE - (len(doc) - 2)
@@ -68,3 +74,14 @@ class TestCreateQueue(util.TestBase):
 
         self.app(env, self.srmock)
         self.assertEquals(self.srmock.status, falcon.HTTP_201)
+
+
+        doc = '{"messages": {"ttl": 600}, "padding": "%s"}'
+        padding_len = transport.MAX_QUEUE_METADATA_SIZE * 2
+        doc = doc % ('x' * padding_len)
+        env = testing.create_environ('/v1/480924/queues/gumshoe',
+                                     method="PUT",
+                                     body=doc)
+
+        self.app(env, self.srmock)
+        self.assertEquals(self.srmock.status, falcon.HTTP_400)
