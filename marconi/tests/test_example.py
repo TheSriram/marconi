@@ -12,16 +12,23 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-import marconi
 from marconi.tests import util as testing
 
 
-class TestSimple(testing.TestBase):
+class TestExample(testing.TestBase):
+
+    def setUp(self):
+        """Run before each test method"""
+        super(TestExample, self).setUp()
+
+        # [Your code here]
+
+    def tearDown(self):
+        """Run after each test method"""
+        # [Your code here]
+
+        super(TestExample, self).tearDown()
 
     def test_simple(self):
         """Doesn't really test much."""
-        conf_file = self.conf_path('wsgi_reference.conf')
-        boot = marconi.Bootstrap(conf_file)
-        transport = boot.transport
-        wsgi_app = transport.app
         self.assertTrue(True)
