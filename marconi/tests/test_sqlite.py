@@ -50,7 +50,8 @@ class TestSqlite(testing.TestBase):
                 "event": "BackupProgress",
                 "currentBytes": "0",
                 "totalBytes": "99614720"
-                }
+                },
+                'ttl': 10
                 }
             ]
         n = q.stats('fizbit', '480924')['messages']

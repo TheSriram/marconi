@@ -140,6 +140,8 @@ class Message(base.MessageBase):
             #TODO(zyuan): insert multiple
             for m in messages:
                 lastid += 1
+                if 'ttl' in m:
+                    ttl = m['ttl']
                 self.driver.run('''insert into Messages values
                         (?, ?, ?, ?, date())''',
                         lastid, qid, ttl, json.dumps(m))
