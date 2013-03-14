@@ -40,7 +40,7 @@ class TestCreateQueue(util.TestBase):
                                      body=doc)
 
         self.app(env, self.srmock)
-        self.assertEquals(falcon.HTTP_200, self.srmock.status)
+        self.assertEquals(self.srmock.status, falcon.HTTP_201)
 
     def test_metadata(self):
         env = testing.create_environ('/v1/480924/queues/fizbat',
@@ -57,14 +57,14 @@ class TestCreateQueue(util.TestBase):
                                      body=doc)
 
         self.app(env, self.srmock)
-        self.assertEquals(self.srmock.status, falcon.HTTP_200)
+        self.assertEquals(self.srmock.status, falcon.HTTP_201)
 
         doc = '{"messages": {"ttl": 600}, "padding": "%s"}'
         padding_len = transport.MAX_QUEUE_METADATA_SIZE - (len(doc) - 2)
         doc = doc % ('x' * padding_len)
-        env = testing.create_environ('/v1/480924/queues/fizbat',
+        env = testing.create_environ('/v1/480924/queues/gumshoe',
                                      method="PUT",
                                      body=doc)
 
         self.app(env, self.srmock)
-        self.assertEquals(self.srmock.status, falcon.HTTP_200)
+        self.assertEquals(self.srmock.status, falcon.HTTP_201)
