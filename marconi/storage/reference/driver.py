@@ -23,7 +23,6 @@ from marconi.storage import exceptions
 
 
 cfg = config.namespace('drivers:storage:reference').from_options(
-        # change it to ':memory:' !!
         database=':memory:')
 
 
@@ -62,7 +61,7 @@ class Queue(base.QueueBase):
     def __init__(self, driver):
         self.driver = driver
         self.driver.run('''create table if not exists Queues (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        id INTEGER PRIMARY KEY,
         tenant TEXT,
         name TEXT,
         ttl INTEGER,
@@ -92,23 +91,24 @@ class Queue(base.QueueBase):
                     tenant, name, metadata['messages']['ttl'],
                     json.dumps(metadata))
         except sqlite3.IntegrityError:
-            raise exceptions.AlreadyExist('/'.join([tenant, 'queues', name]))
+            raise exceptions.AlreadyExists('/'.join([tenant, 'queues', name]))
 
     def update(self, name, tenant, **metadata):
-        self.driver.run('''update Queues set ttl = ?, metadata = ? where
-                tenant = ? and name = ?''',
-                metadata['messages']['ttl'],
-                json.dumps(metadata), tenant, name)
+        self.driver.run('''replace into Queues values
+                (null, ?, ?, ?, ?)''',
+                tenant, name, metadata['messages']['ttl'],
+                json.dumps(metadata))
 
     def delete(self, name, tenant):
         self.driver.run('''delete from Queues where tenant = ? and name = ?''',
                 tenant, name)
+        #TODO(zyuan): delete messages or add triggers
 
     def stats(self, name, tenant):
-        qid = self.driver.get('''select id from Queues where
-                tenant = ? and name = ?''', tenant, name)[0]
         return {'messages': self.driver.get('''select count(id)
-            from Messages where qid = ?''', qid)[0],
+                from Messages where
+                qid = (select id from Queues where
+                       tenant = ? and name = ?)''', tenant, name)[0],
                 'actions': 0}
 
     def actions(self, name, tenant, marker=None, limit=10):
@@ -146,7 +146,7 @@ class Message(base.MessageBase):
                 if 'ttl' in m:
                     ttl = m['ttl']
                 self.driver.run('''insert into Messages values
-                        (?, ?, ?, ?, date())''',
+                        (?, ?, ?, ?, datetime())''',
                         lastid, qid, ttl, json.dumps(m))
         return [str(x + 1) for x in range(lastid - len(messages), lastid)]
 
