@@ -15,7 +15,6 @@
 
 import testtools
 
-from marconi.common import config
 from marconi.storage import exceptions
 from marconi.storage import reference
 from marconi.tests import util as testing

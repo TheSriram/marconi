@@ -20,11 +20,11 @@ from falcon import testing
 from testtools import matchers
 
 import marconi
-from marconi.tests import util
+import marconi.tests.util
 from marconi import transport
 
 
-class TestCreateQueue(util.TestBase):
+class TestCreateQueue(marconi.tests.util.TestBase):
 
     def setUp(self):
         super(TestCreateQueue, self).setUp()

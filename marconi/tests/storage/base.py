@@ -15,10 +15,10 @@
 
 
 from marconi import storage
-from marconi.tests.util import suite
+import marconi.tests.util
 
 
-class ControllerBaseTest(suite.TestSuite):
+class ControllerBaseTest(marconi.tests.util.TestBase):
     tenant = "tenant"
     driver_class = None
     controller_class = None

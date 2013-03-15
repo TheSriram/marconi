@@ -18,13 +18,13 @@ from marconi.tests import util as testing
 class TestExample(testing.TestBase):
 
     def setUp(self):
-        """Run before each test method"""
+        """Run before each test method."""
         super(TestExample, self).setUp()
 
         # [Your code here]
 
     def tearDown(self):
-        """Run after each test method"""
+        """Run after each test method."""
         # [Your code here]
 
         super(TestExample, self).tearDown()
