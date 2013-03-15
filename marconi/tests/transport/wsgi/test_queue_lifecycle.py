@@ -13,6 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import json
+
 import falcon
 from falcon import testing
 from testtools import matchers
@@ -36,8 +38,7 @@ class TestCreateQueue(util.TestBase):
     def test_simple(self):
         doc = '{"messages": {"ttl": 600}}'
         env = testing.create_environ('/v1/480924/queues/gumshoe',
-                                     method="PUT",
-                                     body=doc)
+                                     method="PUT", body=doc)
 
         self.app(env, self.srmock)
         self.assertEquals(self.srmock.status, falcon.HTTP_201)
@@ -50,40 +51,66 @@ class TestCreateQueue(util.TestBase):
         self.assertEquals(self.srmock.status, falcon.HTTP_200)
         self.assertEquals(result, [doc])
 
-    def test_metadata(self):
-        env = testing.create_environ('/v1/480924/queues/fizbat',
-                                     method="PUT")
+    def test_no_metadata(self):
+        env = testing.create_environ('/v1/480924/queues/fizbat', method="PUT")
 
         self.app(env, self.srmock)
         self.assertEquals(self.srmock.status, falcon.HTTP_400)
 
+    def test_too_much_metadata(self):
         doc = '{"messages": {"ttl": 600}, "padding": "%s"}'
         padding_len = transport.MAX_QUEUE_METADATA_SIZE - (len(doc) - 2) + 1
         doc = doc % ('x' * padding_len)
         env = testing.create_environ('/v1/480924/queues/fizbat',
-                                     method="PUT",
-                                     body=doc)
+                                     method="PUT", body=doc)
 
-        print('\n' + str(len(doc)))
         self.app(env, self.srmock)
         self.assertEquals(self.srmock.status, falcon.HTTP_400)
 
+    def test_way_too_much_metadata(self):
+        doc = '{"messages": {"ttl": 600}, "padding": "%s"}'
+        padding_len = transport.MAX_QUEUE_METADATA_SIZE * 100
+        doc = doc % ('x' * padding_len)
+        env = testing.create_environ('/v1/480924/queues/gumshoe',
+                                     method="PUT", body=doc)
+
+        self.app(env, self.srmock)
+        self.assertEquals(self.srmock.status, falcon.HTTP_400)
+
+    def test_custom_metadata(self):
+        # Set
         doc = '{"messages": {"ttl": 600}, "padding": "%s"}'
         padding_len = transport.MAX_QUEUE_METADATA_SIZE - (len(doc) - 2)
         doc = doc % ('x' * padding_len)
         env = testing.create_environ('/v1/480924/queues/gumshoe',
-                                     method="PUT",
-                                     body=doc)
+                                     method="PUT", body=doc)
 
         self.app(env, self.srmock)
         self.assertEquals(self.srmock.status, falcon.HTTP_201)
 
-        doc = '{"messages": {"ttl": 600}, "padding": "%s"}'
-        padding_len = transport.MAX_QUEUE_METADATA_SIZE * 2
-        doc = doc % ('x' * padding_len)
-        env = testing.create_environ('/v1/480924/queues/gumshoe',
-                                     method="PUT",
-                                     body=doc)
+        # Get
+        env = testing.create_environ('/v1/480924/queues/gumshoe')
+        result = self.app(env, self.srmock)
+        result_doc = json.loads(result[0])
+        self.assertEquals(result_doc, json.loads(doc))
+
+    def test_update_metadata(self):
+        # Create
+        doc1 = '{"messages": {"ttl": 600}}'
+        env = testing.create_environ('/v1/480924/queues/xyz',
+                                     method="PUT", body=doc1)
 
         self.app(env, self.srmock)
-        self.assertEquals(self.srmock.status, falcon.HTTP_400)
+
+        # Update
+        doc2 = '{"messages": {"ttl": 100}}'
+        env = testing.create_environ('/v1/480924/queues/xyz',
+                                     method="PUT", body=doc2)
+
+        self.app(env, self.srmock)
+
+        # Get
+        env = testing.create_environ('/v1/480924/queues/xyz')
+        result = self.app(env, self.srmock)
+        result_doc = json.loads(result[0])
+        self.assertEquals(result_doc, json.loads(doc2))

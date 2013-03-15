@@ -17,6 +17,7 @@ import json
 
 import falcon
 
+from marconi import storage
 from marconi import transport
 
 
@@ -39,8 +40,12 @@ class QueuesResource(object):
         #TODO(kgriffs): check for malformed JSON, must be a hash at top level
         meta = json.load(req.stream)
 
-        #TODO(kgriffs): catch exceptions
-        self.queue_ctrl.create(queue_name, tenant=tenant_id, **meta)
+        #TODO(kgriffs): catch other kinds of exceptions
+        try:
+            self.queue_ctrl.create(queue_name, tenant=tenant_id, **meta)
+        except storage.exceptions.AlreadyExists:
+            self.queue_ctrl.update(queue_name, tenant=tenant_id, **meta)
+
         resp.status = falcon.HTTP_201
         resp.location = req.path
 
