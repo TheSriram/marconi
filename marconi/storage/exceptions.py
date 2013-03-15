@@ -14,7 +14,7 @@
 # limitations under the License.
 
 
-class AlreadyExist(Exception):
+class AlreadyExists(Exception):
     pass
 
 class DoesNotExist(Exception):
