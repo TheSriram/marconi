@@ -84,6 +84,9 @@ class Queue(base.QueueBase):
         except TypeError:
             raise exceptions.DoesNotExist('/'.join([tenant, 'queues', name]))
 
+    def upsert(self, name, tenant=None, metadata=None):
+        pass
+
     def create(self, name, tenant, **metadata):
         try:
             self.driver.run('''insert into Queues values
